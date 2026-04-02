@@ -1,0 +1,111 @@
+`timescale 1ns/1ps
+
+module fifo_tb;
+
+parameter FIFO_WIDTH = 8;
+parameter FIFO_DEPTH = 16;
+
+// Testbench signals
+reg clk;
+reg rst_n;
+reg wr;
+reg rd;
+reg [FIFO_WIDTH-1:0] data_in;
+
+wire [FIFO_WIDTH-1:0] data_out;
+wire fifo_full;
+wire fifo_empty;
+
+
+// DUT Instantiation
+fifo uut (
+    .clk(clk),
+    .rst_n(rst_n),
+    .wr(wr),
+    .rd(rd),
+    .data_in(data_in),
+    .data_out(data_out),
+    .fifo_full(fifo_full),
+    .fifo_empty(fifo_empty)
+);
+
+
+// Clock generation
+initial clk = 0;
+always #5 clk = ~clk;
+
+
+// WRITE TASK
+task write_fifo;
+input [7:0] data;
+begin
+    @(posedge clk);
+    wr = 1;
+    rd = 0;
+    data_in = data;
+
+    @(posedge clk);
+    wr = 0;
+end
+endtask
+
+
+// READ TASK
+task read_fifo;
+begin
+    @(posedge clk);
+    rd = 1;
+    wr = 0;
+
+    @(posedge clk);
+    rd = 0;
+end
+endtask
+
+
+integer i;
+
+initial
+begin
+
+    // Waveform dump for EDA Playground
+    $dumpfile("fifo_wave.vcd");
+    $dumpvars(0, fifo_tb);
+
+    // Initialize signals
+    rst_n = 0;
+    wr = 0;
+    rd = 0;
+    data_in = 0;
+
+    // Reset
+    #20 rst_n = 1;
+
+    // Write data
+    for(i = 0; i < 10; i = i + 1)
+        write_fifo(i);
+
+    // Read data
+    for(i = 0; i < 10; i = i + 1)
+        read_fifo();
+
+    // Try reading when empty
+    read_fifo();
+
+    // Fill FIFO completely
+    for(i = 0; i < 16; i = i + 1)
+        write_fifo(i + 20);
+
+    #50 $finish;
+
+end
+
+
+// Monitor signals
+initial
+begin
+    $monitor("Time=%0t wr=%b rd=%b data_in=%0d data_out=%0d full=%b empty=%b",
+             $time, wr, rd, data_in, data_out, fifo_full, fifo_empty);
+end
+
+endmodule
