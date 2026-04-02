@@ -6,7 +6,7 @@
 This project focuses on the **design and verification of a synchronous FIFO (First-In-First-Out) memory** using Verilog HDL. The objective is to validate FIFO functionality through a structured testbench and simulation using tools like ModelSim or EDA Playground.
 
 The verification ensures correct data flow, pointer updates, and status flag generation under various operating conditions.
-
+NOTE: The files were executed using EDA playground. Hence, the attached files are text files.
 ## Objectives
 
 * Design a parameterized FIFO memory
